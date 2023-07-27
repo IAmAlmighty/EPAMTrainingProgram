@@ -7,6 +7,21 @@ Generating random numbers using 'randint' function from builtin 'random' module.
 Assuming both 0 and 1000 should be included.
 """
 
+
+def sort_list(arr):
+    """Sorts integers in a list."""
+    n = len(arr)
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            if arr[i] > arr[j]:
+                arr[i], arr[j] = arr[j], arr[i]
+"""
+Algorithm works like this:
+first pointer <i> goes from first element to last - 1;
+second pointer <j> goes from first pointer + 1 to last element;
+if element on first pointer greater than element on second, swap elements.
+"""
+
 # sort list from min to max (without using sort())
 sorted_rand_nums = []
 """New list for sorted values."""
