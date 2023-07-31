@@ -1,0 +1,17 @@
+[
+  {
+    "type": "News",
+    "text": "something new happened.",
+    "city": "Anywhere"
+  },
+  {
+    "type": "Ad",
+    "text": "this is your ad.",
+    "days": 17
+  },
+  {
+    "type": "GeeseFacts",
+    "text": "gooses are amazing.",
+    "certainty": 117
+  }
+]
