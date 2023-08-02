@@ -1,6 +1,7 @@
+from csv_parsing.home_task import CSVExporter, Parser
 from string_object.home_task import normalize_text
-from datetime import datetime, timedelta
 from random import choice, randint
+from datetime import datetime
 import json
 import os
 
@@ -9,10 +10,12 @@ geese_facts_file = "facts_about_geese.json"
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 default_news_import_file = os.path.join(PROJECT_ROOT, "news_to_feed.json")
 
+default_date_format = "%Y-%m-%d"
+
 
 def current_date():
     """Returns current date with default format."""
-    return datetime.date(datetime.today())  # task asks just for date, not date and time
+    return datetime.date(datetime.today())
 
 
 def reset_newsfeed():
@@ -33,16 +36,33 @@ def get_geese_facts():
         return json.load(file)
 
 
+def get_file_data_json(file_path):
+    """Returns data from file path in JSON format."""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
 def get_file_data(file_path):
     """Returns data from file path."""
     with open(file_path, "r", encoding="utf-8") as file:
-        return json.load(file)
+        return file.read()
 
 
 class FeedGenerator:
     """Base class for feed record generation."""
     prefix = "Feed"
     suffix = "*************"
+    fields = {"type", "text"}
+
+    @staticmethod
+    def export_feed_words_chars_count():
+        """Retrieves newsfeed data: words count, chars count. Exports such data to CSV file."""
+        feed_text = get_file_data(newsfeed_file)
+        words_dict = Parser.count_words(feed_text)
+        chars_dict = Parser.count_chars(feed_text)
+        exp = CSVExporter()
+        exp.export_words(words_dict)
+        exp.export_chars(chars_dict)
 
     def generate(self):
         """Implements process of generating feed input and putting it to newsfeed."""
@@ -62,6 +82,9 @@ class FeedGenerator:
                 f"\n{self.suffix}\n")
 
     def inner_text(self, data):
+        for f in self.fields:
+            if f not in data:
+                raise ValueError(f"Wrong data passed: {data},\nkeys should contain: {self.fields}")
         return "-==-"
 
 
@@ -69,6 +92,7 @@ class News(FeedGenerator):
     """Implements adding news to newsfeed.
     Includes: news, city, date of publishing."""
     prefix = "News"
+    fields = {"type", "text", "city"}
 
     def input_data(self):
         data = {"text": input("Provide news text:\n"),
@@ -83,19 +107,35 @@ class News(FeedGenerator):
 
 class Ad(FeedGenerator):
     """Implements adding ads to newsfeed.
-    Includes: Advertising, date of ad expiration."""
+    Includes: Advertising text, date of ad expiration."""
     prefix = "Private Ad"
+    exp_date_input_text = "Provide advertising expiration date in format <year-month-day> (eg: 2077-07-13):\n"
+    fields = {"type", "text", "exp_date"}
 
     def input_data(self):
         data = {"text": input("Provide advertising text:\n"),
-                "days": int(input("Provide advertising expiration timeout in days:\n"))}
+                "exp_date": input(self.exp_date_input_text)}
+        self.validate_exp_date(data["exp_date"])
+
         return data
 
+    @staticmethod
+    def validate_exp_date(date):
+        """Validate passed date: correctness and it must be in a future."""
+        try:
+            date = datetime.date(datetime.strptime(date, default_date_format))
+        except ValueError:
+            raise
+        if date <= datetime.date(datetime.today()):
+            raise ValueError(f"Date passed must be in future, got: {date}")
+
     def inner_text(self, data):
-        ad_exp_timeout = data["days"]
-        exp_date = current_date() + timedelta(days=ad_exp_timeout)
+        super().inner_text(data)
+        exp_days_left = (datetime.date(datetime.strptime(data["exp_date"], default_date_format)) -
+                         datetime.date(datetime.today())).days
+
         return f"{data['text']}\n" \
-               f"Actual until: {exp_date}, {ad_exp_timeout} days left"
+               f"Actual until: {data['exp_date']}, {exp_days_left} days left"
 
 
 class GeeseFacts(FeedGenerator):
@@ -103,7 +143,7 @@ class GeeseFacts(FeedGenerator):
     prefix = "Facts about geese."
 
     def input_data(self):
-        data = {"text": choice(get_file_data(geese_facts_file)),
+        data = {"text": choice(get_file_data_json(geese_facts_file)),
                 "certainty": randint(101, 115)}
         return data
 
@@ -112,25 +152,7 @@ class GeeseFacts(FeedGenerator):
                f"Info certainty: {data['certainty']}%"
 
 
-class FeedFactory:
-    """Factory class for deciding what type of content user want to add to the feed."""
-    classes = {News.__name__: News(), Ad.__name__: Ad(), GeeseFacts.__name__: GeeseFacts()}
-    cls_enum = {i: c for i, c in enumerate(classes.keys())}
-
-    input_txt = f"Please, choose what content type do you want to add by entering given number of feed type:\n" + \
-                str(cls_enum) + "\n"
-
-    def generate(self):
-        """Redirects newsfeed generation to chosen class."""
-        index = int(input(self.input_txt))
-        while index not in range(len(self.classes)):
-            index = int(input(self.input_txt))
-
-        cls_name = self.cls_enum[index]
-        self.classes[cls_name].generate()
-
-
-class FeedImport(FeedFactory):
+class FeedImport:
     """Implements adding entries in bulk to feed from file."""
 
     @staticmethod
@@ -142,12 +164,12 @@ class FeedImport(FeedFactory):
             file_path = default_news_import_file
         return file_path
 
-    def import_feed(self, normalize=False):
+    def import_feed(self, classes, normalize=False):
         """
         Imports data from file to feed in bulk. Then deletes that file.
         """
         file_path = self.input_import_file_path()
-        file_data = get_file_data(file_path)
+        file_data = get_file_data_json(file_path)
 
         text = ""
         for data in file_data:
@@ -155,18 +177,37 @@ class FeedImport(FeedFactory):
             if normalize:
                 data["text"] = normalize_text(data["text"])
 
-            text += self.classes[obj_type].form_feed_record(data)
+            text += classes[obj_type].form_feed_record(data)
 
         add_text_to_feed_file(text)
         print(f"Removing file: {file_path}")
         os.remove(file_path)
 
 
-if __name__ == "__main__":
-    """Generate feed entries by input."""
-    ff = FeedFactory()
-    ff.generate()
+class FeedFactory:
+    """Factory class for deciding what type of content user want to add to the feed."""
+    classes = {News.__name__: News(), Ad.__name__: Ad(), GeeseFacts.__name__: GeeseFacts(), FeedImport.__name__: FeedImport()}
+    cls_enum = {i: c for i, c in enumerate(classes.keys())}
 
-    """Import bulk of feed entries by file."""
-    fi = FeedImport()
-    fi.import_feed(normalize=True)
+    input_txt = f"Please, choose what content type do you want to add by entering given number of feed type:\n" + \
+                str(cls_enum) + "\n"
+
+    def run(self):
+        """Decides whether user want to generate news feed from console by hand or import it from file."""
+        index = int(input(self.input_txt))
+        while index not in range(len(self.cls_enum)):
+            index = int(input(self.input_txt))
+
+        cls_name = self.cls_enum[index]
+        if cls_name == FeedImport.__name__:
+            self.classes[cls_name].import_feed(self.classes, normalize=True)
+        else:
+            self.classes[cls_name].generate()
+
+        FeedGenerator.export_feed_words_chars_count()
+
+
+if __name__ == "__main__":
+    """Generate feed entries by input or import in bulk."""
+    ff = FeedFactory()
+    ff.run()
