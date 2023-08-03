@@ -4,11 +4,12 @@ from random import choice, randint
 from datetime import datetime
 import json
 import os
+import re
 
 newsfeed_file = "newsfeed.txt"
 geese_facts_file = "facts_about_geese.json"
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-default_news_import_file = os.path.join(PROJECT_ROOT, "news_to_feed.json")
+default_news_import_file = os.path.join(PROJECT_ROOT, "news_to_feed.txt")
 
 default_date_format = "%Y-%m-%d"
 
@@ -169,10 +170,11 @@ class FeedImport:
         Imports data from file to feed in bulk. Then deletes that file.
         """
         file_path = self.input_import_file_path()
-        file_data = get_file_data_json(file_path)
+        file_data = get_file_data(file_path)
+        parsed_data = self.parse(file_data)
 
         text = ""
-        for data in file_data:
+        for data in parsed_data:
             obj_type = data["type"]
             if normalize:
                 data["text"] = normalize_text(data["text"])
@@ -182,6 +184,26 @@ class FeedImport:
         add_text_to_feed_file(text)
         print(f"Removing file: {file_path}")
         os.remove(file_path)
+
+    @staticmethod
+    def parse(data):
+        """Returns list with dicts of parsed items."""
+        entries_separator_regex = r"\[(.*?)\]"
+        entry_row_separator = ";\n"
+        key_value_separator = r"(.*):\"(.*)\""
+        rows, result = [], []
+
+        for e in re.findall(entries_separator_regex, data, flags=re.DOTALL):
+            rows.append([r for r in e.split(entry_row_separator) if r])
+
+        for i, row in enumerate(rows):
+            result.append({})
+            for r in row:
+                k, v = re.findall(key_value_separator, r, flags=re.DOTALL)[0]
+                k = re.sub(r"\s", "", k)
+                result[i].update({k: v})
+
+        return result
 
 
 class FeedFactory:

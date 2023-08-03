@@ -22,7 +22,7 @@ initial_text = """homEwork:
 
 def normalize_text(text):
     """Returns normalized text."""
-    split_text = text.lower().split(".")[:-1]
+    split_text = [t for t in text.lower().split(".") if t]
     result = ""
     for sentence in split_text:
         first_letter_i = next(re.finditer(r"[A-Za-z]", sentence)).start()

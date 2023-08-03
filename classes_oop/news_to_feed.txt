@@ -1,0 +1,16 @@
+[
+type:"News";
+text:"something new happened.
+or maybe not";
+city:"Anywhere";
+]
+[
+type:"Ad";
+text:"this is your ad.";
+exp_date:"2027-08-30";
+]
+[
+type:"GeeseFacts";
+text:"gooses are amazing.";
+certainty:"117";
+]
