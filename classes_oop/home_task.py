@@ -7,7 +7,6 @@ import json
 import os
 import re
 
-newsfeed_file = "newsfeed.txt"
 geese_facts_file = "facts_about_geese.json"
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 default_news_import_file = os.path.join(PROJECT_ROOT, "news_to_feed.txt")
