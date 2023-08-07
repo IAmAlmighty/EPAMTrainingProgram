@@ -5,7 +5,7 @@ or maybe not";
 city:"Anywhere";
 ]
 [
-type:"Ad";
+type:"Ads";
 text:"this is your ad.";
 exp_date:"2027-08-30";
 ]
