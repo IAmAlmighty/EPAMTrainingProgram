@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage ('GIT Checkout'){
+            steps {
+                git changelog: false, poll: false, url: 'https://github.com/IAmAlmighty/EPAMTrainingProgram.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+    }
+        stage ('Run test'){
+            steps {
+                sh 'python -m pytest'
+            }
+        }
+    }
+}
