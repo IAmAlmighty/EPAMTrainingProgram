@@ -1,4 +1,5 @@
 from db_test_framework.automation.config import Config
+import pymssql
 import pyodbc
 
 
@@ -8,6 +9,7 @@ class DB:
     def __init__(self):
         self.cfg = Config()
         self.cursor = self._connect()
+        # self.cursor = self._connect_pymssql()
 
     def _connect(self):
         db_items_config = self.cfg.db_items
@@ -18,6 +20,16 @@ class DB:
             f"Port={db_items_config['port']};"
             f"User ID={db_items_config['user_name']};"
             f"Password={db_items_config['user_password']}"
+        ).cursor()
+
+    def _connect_pymssql(self):
+        db_items_config = self.cfg.db_items
+        return pymssql.connect(
+            server=db_items_config["server"],
+            user=db_items_config["user_name"],
+            password=db_items_config["user_password"],
+            database=self.name,
+            port=db_items_config["port"]
         ).cursor()
 
     @property
@@ -58,4 +70,4 @@ class DB:
 
 if __name__ == "__main__":
     db = DB()
-
+    pass
