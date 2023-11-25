@@ -8,8 +8,8 @@ class DB:
 
     def __init__(self):
         self.cfg = Config()
-        # self.cursor = self._connect()
-        self.cursor = self._connect_pymssql()
+        self.cursor = self._connect()
+        # self.cursor = self._connect_pymssql()
 
     def _connect(self):
         db_items_config = self.cfg.db_items
