@@ -26,8 +26,8 @@ class DB:
         db_items_config = self.cfg.db_items
         return pymssql.connect(
             server=db_items_config["server"],
-            # user=db_items_config["user_name"],
-            # password=db_items_config["user_password"],
+            user=db_items_config["user_name"],
+            password=db_items_config["user_password"],
             database=self.name,
             port=int(db_items_config["port"])
         ).cursor()
