@@ -9,7 +9,8 @@ class DB:
     def __init__(self):
         self.cfg = Config()
         # self.cursor = self._connect()
-        self.cursor = self._connect_pymssql()
+        self.connection = self._connect_pymssql()
+        self.cursor = self.connection.cursor()
 
     def _connect(self):
         db_items_config = self.cfg.db_items
@@ -20,17 +21,17 @@ class DB:
             f"Port={db_items_config['port']};"
             f"User ID={db_items_config['user_name']};"
             f"Password={db_items_config['user_password']}"
-        ).cursor()
+        )
 
     def _connect_pymssql(self):
         db_items_config = self.cfg.db_items
         return pymssql.connect(
             server=db_items_config["server"],
-            # user=db_items_config["user_name"],
-            # password=db_items_config["user_password"],
+            user=db_items_config["user_name"],
+            password=db_items_config["user_password"],
             database=self.name,
             port=int(db_items_config["port"])
-        ).cursor()
+        )
 
     @property
     def execute(self):
