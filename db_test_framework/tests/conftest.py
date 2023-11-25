@@ -4,4 +4,4 @@ import pytest
 
 @pytest.fixture(scope="session", autouse=False)
 def db(request):
-    yield DB()
+    return DB()
