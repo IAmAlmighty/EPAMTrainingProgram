@@ -16,6 +16,6 @@ class Config:
     def db_items(self):
         return self.cfg._sections["DB"]
 
-
-if __name__ == "__main__":
-    cfg = Config()
+    @property
+    def df_items(self):
+        return self.cfg._sections["DF"]
