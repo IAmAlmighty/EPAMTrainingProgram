@@ -2,14 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Build and Run') {
             steps {
-                sh '. /venv/bin/activate && cd db_test_framework/ && pip install -r requirements.txt --break-system-packages'
-            }
-    }
-        stage ('Run test'){
-            steps {
-                sh 'python3 -m pytest -m DataFrames'
+                sh '. /venv/bin/activate && cd db_test_framework/ && pip install -r requirements.txt --break-system-packages && python3 -m pytest'
             }
         }
     }
