@@ -1,0 +1,82 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "my_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Name"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "SafetyStockLevel"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "ProductNumber"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "ReorderPoint"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "SafetyStockLevel",
+        "max_value": 1000,
+        "min_value": 4
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_value_lengths_to_be_between",
+      "kwargs": {
+        "column": "ProductNumber",
+        "max_value": 10,
+        "min_value": 7
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_like_pattern",
+      "kwargs": {
+        "column": "ProductNumber",
+        "like_pattern": "%-%"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_distinct_values_to_equal_set",
+      "kwargs": {
+        "column": "MakeFlag",
+        "value_set": [
+          0,
+          1
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_equal",
+      "kwargs": {
+        "value": 504
+      },
+      "meta": {}
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.3"
+  }
+}
